@@ -27,13 +27,54 @@ export const plateConfig = {
     },
 
     camera: {
-        fov: 42,
-        position: [3.0, 2.2, 4] as [number, number, number],
-        lookAt: [0, 0.15, 0] as [number, number, number],
+        fov: 40,
+        position: [3.0, 1.2, 5] as [number, number, number],
+        lookAt: [0, 0.05, 0] as [number, number, number],
+    },
+
+    // Plate rotation (in radians) — static tilt applied to outer wrapper group.
+    // The animated carousel spin is on a separate inner group so it doesn't
+    // clobber these values.
+    plateRotation: {
+        x: Math.PI * 60 / 180,      // +60 deg — tilt top face toward camera
+        y: -Math.PI * 80 / 180,     // -80 deg — anticlockwise turn
+        z: Math.PI * 10 / 180,      // +10 deg — slight clockwise roll
+    },
+
+    /** Section rotation — auto-rotate plate to center the active section */
+    sectionRotation: {
+        enabled: true,
     },
 } as const;
 
 export type PlateConfig = typeof plateConfig;
+
+/**
+ * Compute the Y-rotation (radians) needed to center a given section in front
+ * of the camera.  The camera sits at roughly +X/+Z, so we rotate the section's
+ * angular midpoint to face that direction.
+ *
+ * `rotationState.rotation` starts at π/2, which is the "home" position.
+ * We offset from there so section 0's midpoint stays centred at the default view.
+ */
+export function computeSectionTargetRotation(
+    sectionIndex: number,
+    sections: SectionDef[],
+): number {
+    if (sectionIndex < 0 || sectionIndex >= sections.length) return 0;
+
+    const sec = sections[sectionIndex];
+    const midDeg = (sec.startDeg + sec.endDeg) / 2;
+    const midRad = (midDeg * Math.PI) / 180;
+
+    // Section 0 midpoint as the baseline — rotating so each section's
+    // midpoint arrives at the same camera-facing angle.
+    const sec0 = sections[0];
+    const baseMidRad = ((sec0.startDeg + sec0.endDeg) / 2 * Math.PI) / 180;
+
+    // Return the base rotation (π/2) minus the angular offset from section 0
+    return Math.PI / 2 - (midRad - baseMidRad);
+}
 
 // ─── Section definition ─────────────────────────────────────────
 

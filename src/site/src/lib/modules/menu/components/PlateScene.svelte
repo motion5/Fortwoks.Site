@@ -14,7 +14,7 @@
     import gsap from 'gsap';
     import PlateBase from './PlateBase.svelte';
     import PieSection from './PieSection.svelte';
-    import { plateConfig as C, DEFAULT_SECTIONS, type SectionDef } from '../utils/plate-config';
+    import { plateConfig as C, DEFAULT_SECTIONS, computeSectionTargetRotation, type SectionDef } from '../utils/plate-config';
     import {
         computeSectionLayout,
         createSectionClipPlanes,
@@ -40,7 +40,7 @@
     // ─── Renderer config ─────────────────────────────────────
     const { renderer, toneMapping, scene } = useThrelte();
     toneMapping.set(THREE.ACESFilmicToneMapping);
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 1.1;
     renderer.localClippingEnabled = true;
 
     // ─── Environment map (subtle gradient for reflections) ──────
@@ -48,9 +48,9 @@
     envCanvas.width = envCanvas.height = 256;
     const ectx = envCanvas.getContext('2d')!;
     const grad = ectx.createLinearGradient(0, 0, 0, 256);
-    grad.addColorStop(0, '#556aa0');
-    grad.addColorStop(0.4, '#8a5a9a');
-    grad.addColorStop(0.7, '#9a5a7a');
+    grad.addColorStop(0, '#7088c0');
+    grad.addColorStop(0.3, '#9a6ab0');
+    grad.addColorStop(0.6, '#b06a8a');
     grad.addColorStop(1, '#1a0a2e');
     ectx.fillStyle = grad;
     ectx.fillRect(0, 0, 256, 256);
@@ -106,6 +106,32 @@
         }
     });
 
+    // ─── Section-driven rotation ────────────────────────────
+    // When a section is selected, stop auto-rotate and tween to face it.
+    let sectionRotationOverride: number | undefined = undefined;
+
+    $effect(() => {
+        if (!C.sectionRotation.enabled) return;
+        if (activeSection < 0) {
+            // No section selected — resume auto-rotate
+            sectionRotationOverride = undefined;
+            rotationState.autoRotate = true;
+            return;
+        }
+
+        const target = computeSectionTargetRotation(activeSection, sections);
+        sectionRotationOverride = target;
+        rotationState.autoRotate = false;
+
+        // Tween the global rotation state toward the section target.
+        // The animation loop's lerp will pick it up smoothly.
+        gsap.to(rotationState, {
+            rotation: target,
+            duration: 0.6,
+            ease: 'power2.out',
+        });
+    });
+
     // ─── Animation loop ──────────────────────────────────────
     useTask((delta) => {
         const t = performance.now() / 1000;
@@ -149,31 +175,35 @@
     oncreate={(ref) => ref.lookAt(...C.camera.lookAt)}
 />
 
-<!-- Lighting -->
-<T.AmbientLight intensity={0.38} />
-<T.DirectionalLight intensity={0.8} position={[5, 8, 4]} />
-<T.DirectionalLight color="#c471f5" intensity={0.15} position={[-4, 3, -2]} />
-<T.DirectionalLight color="#00d2d3" intensity={0.15} position={[0, 2, -5]} />
+<!-- Lighting — low ambient + strong directional for glossy edge shadows -->
+<T.AmbientLight intensity={0.15} />
+<T.DirectionalLight intensity={1.6} position={[3, 8, 4]} />
+<T.DirectionalLight color="#c471f5" intensity={0.2} position={[-3, 5, -2]} />
+<T.DirectionalLight color="#ffffff" intensity={0.4} position={[-1, 2, 7]} />
 <T.PointLight color="#fa71cd" intensity={0.12} distance={8} position={[0, -1.5, 0]} />
 
-<!-- Base plate -->
-<T.Group bind:ref={plateGroup}>
-    <PlateBase floatY={plateFloatY} />
+<!-- Base plate — outer group = static tilt, inner group = animated spin -->
+<T.Group position.y={0} rotation.x={C.plateRotation.x} rotation.y={C.plateRotation.y} rotation.z={C.plateRotation.z}>
+    <T.Group bind:ref={plateGroup}>
+        <PlateBase floatY={plateFloatY} />
+    </T.Group>
 </T.Group>
 
-<!-- Floating sections -->
-<T.Group bind:ref={sectionsGroup} position.y={secFloatY}>
-    {#each sectionData as sec, i (i)}
-        <!-- Per-section group for lift animation -->
-        <T.Group oncreate={(ref) => registerSectionGroup(i, ref)}>
-            <PieSection
-                startDeg={sec.def.startDeg}
-                endDeg={sec.def.endDeg}
-                floorColor={sec.def.floorColor}
-                rimColor={sec.def.rimColor}
-                active={i === activeSection}
-                name="section-{i}"
-            />
-        </T.Group>
-    {/each}
+<!-- Floating sections — same nesting: outer tilt, inner animated spin + float -->
+<T.Group position.y={0} rotation.x={C.plateRotation.x} rotation.y={C.plateRotation.y} rotation.z={C.plateRotation.z}>
+    <T.Group bind:ref={sectionsGroup} position.y={secFloatY}>
+        {#each sectionData as sec, i (i)}
+            <!-- Per-section group for lift animation -->
+            <T.Group oncreate={(ref) => registerSectionGroup(i, ref)}>
+                <PieSection
+                    startDeg={sec.def.startDeg}
+                    endDeg={sec.def.endDeg}
+                    floorColor={sec.def.floorColor}
+                    rimColor={sec.def.rimColor}
+                    active={i === activeSection}
+                    name="section-{i}"
+                />
+            </T.Group>
+        {/each}
+    </T.Group>
 </T.Group>
