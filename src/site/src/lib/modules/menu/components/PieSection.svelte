@@ -70,40 +70,50 @@
         rimHeight: C.sections.rimHeight
     });
 
-    // ─── Emissive glow animation ──────────────────────────────
-    // Boost emissive colour for active glow — moderate multiplier preserves contour/shadow detail
-    const emissiveColor = new THREE.Color(floorColor);
-    emissiveColor.r = Math.min(emissiveColor.r * 1.8, 1);
-    emissiveColor.g = Math.min(emissiveColor.g * 1.8, 1);
-    emissiveColor.b = Math.min(emissiveColor.b * 1.8, 1);
-    const rimEmissiveColor = new THREE.Color(rimColor);
-    rimEmissiveColor.r = Math.min(rimEmissiveColor.r * 1.8, 1);
-    rimEmissiveColor.g = Math.min(rimEmissiveColor.g * 1.8, 1);
-    rimEmissiveColor.b = Math.min(rimEmissiveColor.b * 1.8, 1);
+    // ─── Active highlight: brighter base color ─────────────────
+    // Instead of emissive glow (which washes out), tween the material
+    // color to a brighter version when active.
+    const baseFloorColor = new THREE.Color(floorColor);
+    const brightFloorColor = baseFloorColor.clone();
+    brightFloorColor.offsetHSL(0, 0.1, 0.2); // slightly more saturated + lighter
+
+    const baseRimColor = new THREE.Color(rimColor);
+    const brightRimColor = baseRimColor.clone();
+    brightRimColor.offsetHSL(0, 0.1, 0.2);
+
+    // Subtle emissive for a hint of self-illumination (not the main effect)
+    const emissiveColor = new THREE.Color(floorColor).multiplyScalar(0.3);
+    const rimEmissiveColor = new THREE.Color(rimColor).multiplyScalar(0.3);
 
     // Refs to materials for GSAP tweening
-    let floorMat: THREE.MeshStandardMaterial | undefined;
-    let rimMat: THREE.MeshStandardMaterial | undefined;
-    let startEdgeMat: THREE.MeshStandardMaterial | undefined;
-    let endEdgeMat: THREE.MeshStandardMaterial | undefined;
-
-    function setEmissiveIntensity(intensity: number) {
-        for (const mat of [floorMat, rimMat, startEdgeMat, endEdgeMat]) {
-            if (mat) mat.emissiveIntensity = intensity;
-        }
-    }
+    let floorMat: THREE.MeshPhysicalMaterial | undefined;
+    let rimMat: THREE.MeshPhysicalMaterial | undefined;
+    let startEdgeMat: THREE.MeshPhysicalMaterial | undefined;
+    let endEdgeMat: THREE.MeshPhysicalMaterial | undefined;
 
     let currentTween: gsap.core.Tween | undefined;
 
     $effect(() => {
-        const targetIntensity = active ? 0.7 : 0.15;
+        const t = active ? 1 : 0;
         currentTween?.kill();
-        const obj = { value: floorMat?.emissiveIntensity ?? 0 };
+        const obj = { value: floorMat ? (floorMat.userData._t ?? 0) : 0 };
         currentTween = gsap.to(obj, {
-            value: targetIntensity,
+            value: t,
             duration: 0.4,
             ease: 'power2.out',
-            onUpdate: () => setEmissiveIntensity(obj.value)
+            onUpdate: () => {
+                const v = obj.value;
+                for (const mat of [floorMat, startEdgeMat, endEdgeMat]) {
+                    if (!mat) continue;
+                    mat.color.copy(baseFloorColor).lerp(brightFloorColor, v);
+                    mat.emissiveIntensity = 0.02 + v * 0.05;
+                    mat.userData._t = v;
+                }
+                if (rimMat) {
+                    rimMat.color.copy(baseRimColor).lerp(brightRimColor, v);
+                    rimMat.emissiveIntensity = 0.02 + v * 0.05;
+                }
+            }
         });
     });
 </script>
@@ -116,13 +126,17 @@
     position.z={layout.offsetZ}
     {name}
 >
-    <T.MeshStandardMaterial
+    <T.MeshPhysicalMaterial
         bind:ref={floorMat}
         color={floorColor}
-        roughness={0.12}
+        roughness={0.04}
         metalness={0.15}
         emissive={emissiveColor}
-        emissiveIntensity={0.15}
+        emissiveIntensity={0.02}
+        envMapIntensity={1.5}
+        clearcoat={1.0}
+        clearcoatRoughness={0.05}
+        reflectivity={0.8}
     />
 </T.Mesh>
 
@@ -133,13 +147,17 @@
     position.x={layout.offsetX}
     position.z={layout.offsetZ}
 >
-    <T.MeshStandardMaterial
+    <T.MeshPhysicalMaterial
         bind:ref={rimMat}
         color={rimColor}
-        roughness={0.08}
-        metalness={0.25}
+        roughness={0.03}
+        metalness={0.2}
         emissive={rimEmissiveColor}
-        emissiveIntensity={0.15}
+        emissiveIntensity={0.02}
+        envMapIntensity={1.8}
+        clearcoat={1.0}
+        clearcoatRoughness={0.03}
+        reflectivity={0.9}
     />
 </T.Mesh>
 
@@ -151,13 +169,17 @@
     rotation.y={startEdge.rotationY}
 >
     <T.BoxGeometry args={[startEdge.length, C.sections.rimHeight, 0.03]} />
-    <T.MeshStandardMaterial
+    <T.MeshPhysicalMaterial
         bind:ref={startEdgeMat}
-        color={rimColor}
-        roughness={0.08}
-        metalness={0.25}
-        emissive={rimEmissiveColor}
-        emissiveIntensity={0.15}
+        color={floorColor}
+        roughness={0.04}
+        metalness={0.15}
+        emissive={emissiveColor}
+        emissiveIntensity={0.02}
+        envMapIntensity={1.5}
+        clearcoat={1.0}
+        clearcoatRoughness={0.05}
+        reflectivity={0.8}
     />
 </T.Mesh>
 
@@ -169,12 +191,16 @@
     rotation.y={endEdge.rotationY}
 >
     <T.BoxGeometry args={[endEdge.length, C.sections.rimHeight, 0.03]} />
-    <T.MeshStandardMaterial
+    <T.MeshPhysicalMaterial
         bind:ref={endEdgeMat}
-        color={rimColor}
-        roughness={0.08}
-        metalness={0.25}
-        emissive={rimEmissiveColor}
-        emissiveIntensity={0.15}
+        color={floorColor}
+        roughness={0.04}
+        metalness={0.15}
+        emissive={emissiveColor}
+        emissiveIntensity={0.02}
+        envMapIntensity={1.5}
+        clearcoat={1.0}
+        clearcoatRoughness={0.05}
+        reflectivity={0.8}
     />
 </T.Mesh>
