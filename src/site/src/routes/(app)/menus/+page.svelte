@@ -26,7 +26,7 @@
 
 	import type { LazyPlate } from '$lib/modules/ordering';
 
-	import { MenuPie, createSectionDefs } from '$lib/modules/menu';
+	import { MenuPie, createSectionDefs, getPlateBaseRotation } from '$lib/modules/menu';
 	import gsap from 'gsap';
 
 	import {
@@ -54,15 +54,20 @@
 	}
 
 	// ─── Mouse-tracking plate rotation ──────────────────────
-	const BASE_ROTATION = 90; // degrees — default center rotation
-	const baseRad = (BASE_ROTATION * Math.PI) / 180;
-
 	// Per-plate rotation range: more sections = fuller sweep
 	const PLATE_ROTATION_RANGE: Record<string, number> = {
 		saver: 120,
 		premium: 360,
 	};
 	const DEFAULT_RANGE = 120;
+
+	/** Lookup the base rotation for a plate by id → section count */
+	const plateSectionCounts: Record<string, number> = {};
+	for (const p of LAZY_PLATES) plateSectionCounts[p.id] = p.sections;
+
+	function baseRadFor(plateId: string): number {
+		return getPlateBaseRotation(plateSectionCounts[plateId] ?? 2);
+	}
 
 	function halfRange(plateId: string): number {
 		const deg = PLATE_ROTATION_RANGE[plateId] ?? DEFAULT_RANGE;
@@ -77,12 +82,12 @@
 	function handlePlateMouseMove(e: MouseEvent, plateId: string) {
 		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
 		const normalizedX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-		// Left edge = clockwise max, right edge = counterclockwise max
+		const base = baseRadFor(plateId);
 		const hr = halfRange(plateId);
-		const targetRad = baseRad - hr + normalizedX * 2 * hr;
+		const targetRad = base - hr + normalizedX * 2 * hr;
 
 		activeTweens[plateId]?.kill();
-		const obj = { value: plateRotations[plateId] ?? baseRad };
+		const obj = { value: plateRotations[plateId] ?? base };
 		activeTweens[plateId] = gsap.to(obj, {
 			value: targetRad,
 			duration: 0.4,
@@ -94,10 +99,11 @@
 	}
 
 	function handlePlateMouseLeave(plateId: string) {
+		const base = baseRadFor(plateId);
 		activeTweens[plateId]?.kill();
-		const obj = { value: plateRotations[plateId] ?? baseRad };
+		const obj = { value: plateRotations[plateId] ?? base };
 		activeTweens[plateId] = gsap.to(obj, {
-			value: baseRad,
+			value: base,
 			duration: 0.6,
 			ease: 'power2.out',
 			onUpdate: () => {
@@ -196,7 +202,7 @@
 			>
 				{#snippet plateVisual(plate)}
 					{@const accent = themeStore.isDark ? plate.accentDark : plate.accentLight}
-					<div class="plate-3d" style:height="200px" style:pointer-events="none">
+					<div class="plate-3d" style:height="190px" style:pointer-events="none">
 						<MenuPie
 							showControls={false}
 							sections={createSectionDefs(plate.sections, accent)}
@@ -372,7 +378,7 @@
 
 	.plate-3d {
 		width: 100%;
-		max-width: 240px;
+		max-width: 220px;
 		margin: 0 auto;
 	}
 

@@ -34,8 +34,8 @@ export const LAZY_PLATES: LazyPlate[] = [
 			{ label: 'Choose your Main', key: 'main' },
 			{ label: 'Choose your Side', key: 'side' }
 		],
-		accentDark: '#ff4d6a',
-		accentLight: '#C41E3A',
+		accentDark: '#e04530',
+		accentLight: '#c4352a',
 		sections: 2
 	},
 	{
@@ -51,8 +51,8 @@ export const LAZY_PLATES: LazyPlate[] = [
 			{ label: 'Choose another Side', key: 'side2' },
 			{ label: 'Choose Sauce or Drink', key: 'bonus' }
 		],
-		accentDark: '#ffb347',
-		accentLight: '#B8860B',
+		accentDark: '#e8a830',
+		accentLight: '#c48a20',
 		sections: 5
 	}
 ];
