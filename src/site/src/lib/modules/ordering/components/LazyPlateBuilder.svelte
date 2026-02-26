@@ -18,15 +18,19 @@
 	import type { LazyPlate, LazyPlateItemsMap } from '../types';
 	import { themeStore } from '../stores/theme.svelte';
 	import { basketStore } from '../stores/basket.svelte';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		plate: LazyPlate;
 		/** Map of step key → available item names */
 		itemsMap: LazyPlateItemsMap;
 		onclose: () => void;
+		/** Optional: render a 3D plate visual that overflows above the sheet.
+		 *  Receives (plate, activeStepIndex) */
+		plateVisual?: Snippet<[LazyPlate, number]>;
 	}
 
-	let { plate, itemsMap, onclose }: Props = $props();
+	let { plate, itemsMap, onclose, plateVisual }: Props = $props();
 
 	let t = $derived(themeStore.tokens);
 	let accent = $derived(themeStore.isDark ? plate.accentDark : plate.accentLight);
@@ -93,6 +97,14 @@
 	class:dark={themeStore.isDark}
 	onclick={handleOverlayClick}
 >
+	<div class="sheet-wrapper">
+		<!-- Floating plate hero (positioned above the sheet) -->
+		{#if plateVisual}
+			<div class="plate-hero">
+				{@render plateVisual(plate, currentStep)}
+			</div>
+		{/if}
+
 	<div
 		class="sheet"
 		style:background={t.sheetBg}
@@ -262,6 +274,7 @@
 			</button>
 		</div>
 	</div>
+	</div>
 </div>
 
 <style>
@@ -282,9 +295,27 @@
 		background: rgba(0, 0, 0, 0.65);
 	}
 
-	.sheet {
+	.sheet-wrapper {
+		position: relative;
 		width: 100%;
 		max-width: 540px;
+		align-self: flex-end;
+	}
+
+	/* Floating plate hero — sits above the sheet top edge */
+	.plate-hero {
+		position: absolute;
+		bottom: calc(100% - 80px);
+		left: 50%;
+		transform: translateX(-50%);
+		width: 220px;
+		height: 200px;
+		pointer-events: none;
+		z-index: 310;
+	}
+
+	.sheet {
+		width: 100%;
 		height: 88vh;
 		border-radius: 24px 24px 0 0;
 		display: flex;

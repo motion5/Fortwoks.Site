@@ -20,13 +20,18 @@
   import PlateScene from './PlateScene.svelte';
   import { menuState, rotationState } from '../stores/menu.svelte';
   import type { SectionId } from '../types';
+  import type { SectionDef } from '../utils/plate-config';
 
   interface Props {
     selectedSection?: SectionId;
     showControls?: boolean;
+    sections?: SectionDef[];
+    targetRotation?: number | undefined;
+    /** Index of the active/highlighted section (-1 = none) */
+    activeSection?: number;
   }
 
-  let { selectedSection = 'main', showControls = true }: Props = $props();
+  let { selectedSection = 'main', showControls = true, sections, targetRotation = undefined, activeSection = -1 }: Props = $props();
 
   $effect(() => {
     menuState.selectedSection = selectedSection;
@@ -40,7 +45,7 @@
 
 <div class="menu-pie-wrapper">
   <Canvas>
-    <PlateScene />
+    <PlateScene {sections} {targetRotation} {activeSection} />
   </Canvas>
 
   {#if showControls}

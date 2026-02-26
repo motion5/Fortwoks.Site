@@ -26,7 +26,8 @@
 
 	import type { LazyPlate } from '$lib/modules/ordering';
 
-	import { MenuPie } from '$lib/modules/menu';
+	import { MenuPie, createSectionDefs } from '$lib/modules/menu';
+	import gsap from 'gsap';
 
 	import {
 		CATEGORIES,
@@ -50,6 +51,59 @@
 
 	function openBuilder(plate: LazyPlate) {
 		builderPlate = plate;
+	}
+
+	// ─── Mouse-tracking plate rotation ──────────────────────
+	const BASE_ROTATION = 90; // degrees — default center rotation
+	const baseRad = (BASE_ROTATION * Math.PI) / 180;
+
+	// Per-plate rotation range: more sections = fuller sweep
+	const PLATE_ROTATION_RANGE: Record<string, number> = {
+		saver: 120,
+		premium: 360,
+	};
+	const DEFAULT_RANGE = 120;
+
+	function halfRange(plateId: string): number {
+		const deg = PLATE_ROTATION_RANGE[plateId] ?? DEFAULT_RANGE;
+		return ((deg / 2) * Math.PI) / 180;
+	}
+
+	// Per-plate GSAP-tweened rotation (keyed by plate id)
+	let plateRotations = $state<Record<string, number>>({});
+	// Track active tweens so we can kill them on leave
+	const activeTweens: Record<string, gsap.core.Tween> = {};
+
+	function handlePlateMouseMove(e: MouseEvent, plateId: string) {
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		const normalizedX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+		// Left edge = clockwise max, right edge = counterclockwise max
+		const hr = halfRange(plateId);
+		const targetRad = baseRad - hr + normalizedX * 2 * hr;
+
+		activeTweens[plateId]?.kill();
+		const obj = { value: plateRotations[plateId] ?? baseRad };
+		activeTweens[plateId] = gsap.to(obj, {
+			value: targetRad,
+			duration: 0.4,
+			ease: 'power2.out',
+			onUpdate: () => {
+				plateRotations[plateId] = obj.value;
+			},
+		});
+	}
+
+	function handlePlateMouseLeave(plateId: string) {
+		activeTweens[plateId]?.kill();
+		const obj = { value: plateRotations[plateId] ?? baseRad };
+		activeTweens[plateId] = gsap.to(obj, {
+			value: baseRad,
+			duration: 0.6,
+			ease: 'power2.out',
+			onUpdate: () => {
+				plateRotations[plateId] = obj.value;
+			},
+		});
 	}
 </script>
 
@@ -134,10 +188,20 @@
 	<main class="main">
 		<!-- Lazy Plates -->
 		<div bind:this={categoryRefs['lazy-plates']}>
-			<LazyPlatesSection plates={LAZY_PLATES} onselect={openBuilder}>
+			<LazyPlatesSection
+				plates={LAZY_PLATES}
+				onselect={openBuilder}
+				oncardmousemove={(e, plate) => handlePlateMouseMove(e, plate.id)}
+				oncardmouseleave={(plate) => handlePlateMouseLeave(plate.id)}
+			>
 				{#snippet plateVisual(plate)}
+					{@const accent = themeStore.isDark ? plate.accentDark : plate.accentLight}
 					<div class="plate-3d" style:height="200px" style:pointer-events="none">
-						<MenuPie showControls={false} />
+						<MenuPie
+							showControls={false}
+							sections={createSectionDefs(plate.sections, accent)}
+							targetRotation={plateRotations[plate.id]}
+						/>
 					</div>
 				{/snippet}
 			</LazyPlatesSection>
@@ -188,7 +252,18 @@
 			plate={builderPlate}
 			itemsMap={LAZY_PLATE_ITEMS}
 			onclose={() => (builderPlate = null)}
-		/>
+		>
+			{#snippet plateVisual(plate, activeStep)}
+				{@const accent = themeStore.isDark ? plate.accentDark : plate.accentLight}
+				<div class="builder-plate" style:pointer-events="none">
+					<MenuPie
+						showControls={false}
+						sections={createSectionDefs(plate.sections, accent)}
+						activeSection={activeStep}
+					/>
+				</div>
+			{/snippet}
+		</LazyPlateBuilder>
 	{/if}
 </div>
 
@@ -299,6 +374,11 @@
 		width: 100%;
 		max-width: 240px;
 		margin: 0 auto;
+	}
+
+	.builder-plate {
+		width: 100%;
+		height: 100%;
 	}
 
 	.main {

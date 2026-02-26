@@ -19,9 +19,13 @@
 		onselect: (plate: LazyPlate) => void;
 		/** Optional: render a custom visual per plate (receives plate as argument) */
 		plateVisual?: Snippet<[LazyPlate]>;
+		/** Called on card mousemove — receives the event and plate */
+		oncardmousemove?: (e: MouseEvent, plate: LazyPlate) => void;
+		/** Called on card mouseleave — receives the plate */
+		oncardmouseleave?: (plate: LazyPlate) => void;
 	}
 
-	let { plates, onselect, plateVisual }: Props = $props();
+	let { plates, onselect, plateVisual, oncardmousemove, oncardmouseleave }: Props = $props();
 	let t = $derived(themeStore.tokens);
 </script>
 
@@ -45,6 +49,8 @@
 				style:border-color={t.surfaceBorder}
 				style:--shadow={themeStore.isDark ? 'none' : '0 4px 20px rgba(0,0,0,0.05)'}
 				onclick={() => onselect(plate)}
+				onmousemove={oncardmousemove ? (e) => oncardmousemove(e, plate) : undefined}
+				onmouseleave={oncardmouseleave ? () => oncardmouseleave(plate) : undefined}
 			>
 				<!-- Glow behind plate visual -->
 				<div
