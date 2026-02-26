@@ -96,9 +96,8 @@
 </script>
 
 <!-- Camera -->
-<!-- @ts-ignore makeDefault is a Threlte shorthand prop -->
 <T.PerspectiveCamera
-  makeDefault={true}
+  {...({ makeDefault: true } as any)}
   fov={C.camera.fov}
   position={C.camera.position}
   oncreate={(ref) => ref.lookAt(...C.camera.lookAt)}

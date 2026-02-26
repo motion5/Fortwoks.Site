@@ -16,11 +16,15 @@
   import { createPieShape, computeSectionLayout, computeEdgeWall } from '../utils/pie-renderer';
   import type { SectionLayout } from '../utils/pie-renderer';
 
-  export let startDeg: number;
-  export let endDeg: number;
-  export let floorColor: string;
-  export let rimColor: string;
-  export let name = '';
+  interface Props {
+    startDeg: number;
+    endDeg: number;
+    floorColor: string;
+    rimColor: string;
+    name?: string;
+  }
+
+  let { startDeg, endDeg, floorColor, rimColor, name = '' }: Props = $props();
 
   // Compute layout
   const layout: SectionLayout = computeSectionLayout(startDeg, endDeg, C.sections);

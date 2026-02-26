@@ -6,7 +6,11 @@
   import { T } from '@threlte/core';
   import { plateConfig as C } from '../utils/plate-config';
 
-  export let floatY = 0;
+  interface Props {
+    floatY?: number;
+  }
+
+  let { floatY = 0 }: Props = $props();
 </script>
 
 <T.Group position.y={floatY}>

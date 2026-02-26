@@ -15,8 +15,12 @@
   import { T } from '@threlte/core';
   import type { Plane } from 'three';
 
-  export let type: 'main' | 'side';
-  export let clipPlanes: Plane[] = [];
+  interface Props {
+    type: 'main' | 'side';
+    clipPlanes?: Plane[];
+  }
+
+  let { type, clipPlanes = [] }: Props = $props();
 
   // Deterministic "random" — seeded positions so they don't change on re-render
   const chunkColors = ['#c0392b', '#27ae60', '#f39c12', '#e74c3c', '#2ecc71'];

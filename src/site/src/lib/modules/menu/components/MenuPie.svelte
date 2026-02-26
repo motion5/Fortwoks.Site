@@ -21,10 +21,16 @@
   import { menuState, rotationState } from '../stores/menu.svelte';
   import type { SectionId } from '../types';
 
-  export let selectedSection: SectionId = 'main';
-  export let showControls = true;
+  interface Props {
+    selectedSection?: SectionId;
+    showControls?: boolean;
+  }
 
-  $: menuState.selectedSection = selectedSection;
+  let { selectedSection = 'main', showControls = true }: Props = $props();
+
+  $effect(() => {
+    menuState.selectedSection = selectedSection;
+  });
 
   function selectSection(s: SectionId) {
     menuState.selectedSection = s;
@@ -43,20 +49,20 @@
       <button
         class="section-btn"
         class:active={menuState.selectedSection === 'main'}
-        on:click={() => selectSection('main')}
+        onclick={() => selectSection('main')}
       >
         Main Dish
       </button>
       <button
         class="section-btn"
         class:active={menuState.selectedSection === 'side'}
-        on:click={() => selectSection('side')}
+        onclick={() => selectSection('side')}
       >
         Side
       </button>
       <button
         class="section-btn"
-        on:click={() => selectSection('none')}
+        onclick={() => selectSection('none')}
       >
         Reset
       </button>
@@ -64,22 +70,22 @@
 
     <!-- Rotation controls -->
     <div class="rotation-controls">
-      <button class="rot-btn" on:click={() => rotationState.nudge(-0.3)}>◀</button>
+      <button class="rot-btn" onclick={() => rotationState.nudge(-0.3)}>◀</button>
       <input
         type="range"
         min="0"
         max="360"
         step="1"
         value={((rotationState.rotation * 180) / Math.PI) % 360}
-        on:input={(e) => {
+        oninput={(e) => {
           rotationState.rotation = (parseFloat(e.currentTarget.value) * Math.PI) / 180;
         }}
       />
-      <button class="rot-btn" on:click={() => rotationState.nudge(0.3)}>▶</button>
+      <button class="rot-btn" onclick={() => rotationState.nudge(0.3)}>▶</button>
       <button
         class="rot-btn"
         class:active={rotationState.autoRotate}
-        on:click={() => (rotationState.autoRotate = !rotationState.autoRotate)}
+        onclick={() => (rotationState.autoRotate = !rotationState.autoRotate)}
       >
         ⟳
       </button>

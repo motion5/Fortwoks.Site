@@ -10,9 +10,15 @@
 -->
 <script lang="ts">
   import MenuPie from './MenuPie.svelte';
+  import type { Snippet } from 'svelte';
 
-  export let title = 'Build Your Plate';
-  export let description = '';
+  interface Props {
+    title?: string;
+    description?: string;
+    children?: Snippet;
+  }
+
+  let { title = 'Build Your Plate', description = '', children }: Props = $props();
 </script>
 
 <div class="menu-card-outer">
@@ -28,7 +34,7 @@
       {#if description}
         <p class="card-description">{description}</p>
       {/if}
-      <slot />
+      {#if children}{@render children()}{/if}
     </div>
   </div>
 </div>
