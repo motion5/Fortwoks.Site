@@ -31,7 +31,6 @@
         <h1 class="title">Checkout</h1>
 
         <div class="layout">
-            <!-- Payment form mock -->
             <div class="card" style:background={t.surface} style:border-color={t.surfaceBorder}>
                 <h2 class="card-title" style:color={t.text}>Payment details</h2>
 
@@ -83,7 +82,6 @@
                 </p>
             </div>
 
-            <!-- Order summary mock -->
             <div class="card" style:background={t.surface} style:border-color={t.surfaceBorder}>
                 <h2 class="card-title" style:color={t.text}>Order summary</h2>
                 <div class="summary-row" style:border-color={t.surfaceBorder}>
