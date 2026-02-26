@@ -28,6 +28,9 @@ jobs:
 
       - name: Build
         working-directory: src/site
+        env:
+          STRIPE_SECRET_KEY: placeholder
+          STRIPE_WEBHOOK_SECRET: placeholder
         run: bun run build
 
       - name: Upload artifact
