@@ -14,7 +14,7 @@
     import gsap from 'gsap';
     import PlateBase from './PlateBase.svelte';
     import PieSection from './PieSection.svelte';
-    import { plateConfig as C, DEFAULT_SECTIONS, computeSectionTargetRotation, type SectionDef } from '../utils/plate-config';
+    import { plateConfig as C, DEFAULT_SECTIONS, computeSectionTargetRotation, getPlateBaseRotation, type SectionDef } from '../utils/plate-config';
     import {
         computeSectionLayout,
         createSectionClipPlanes,

@@ -91,6 +91,56 @@
     let startEdgeMat: THREE.MeshPhysicalMaterial | undefined;
     let endEdgeMat: THREE.MeshPhysicalMaterial | undefined;
 
+    // ─── Curved specular brush-stroke ────────────────────────
+    // Arc-shaped highlight following the section's curvature,
+    // inset from the outer rim, tapering at both ends.
+    function createBrushStrokeGeo(oR: number, sDeg: number, eDeg: number): THREE.BufferGeometry {
+        const inset = 0.12;       // fraction inset from outer edge
+        const coverage = 0.45;    // fraction of arc to cover (~15% shorter)
+        const maxWidth = 0.08;    // radial width at thickest point
+        const segs = 32;
+
+        const midDeg = (sDeg + eDeg) / 2;
+        const centerDeg = midDeg - (eDeg - sDeg) * 0.15; // offset toward start edge
+        const span = (eDeg - sDeg) * coverage;
+        const arcStart = THREE.MathUtils.degToRad(centerDeg - span / 2);
+        const spanRad = THREE.MathUtils.degToRad(span);
+        const baseR = oR * (1 - inset);
+
+        const pos: number[] = [];
+        const idx: number[] = [];
+
+        for (let i = 0; i <= segs; i++) {
+            const t = i / segs;
+            const angle = arcStart + spanRad * t;
+            const taper = Math.sin(t * Math.PI); // 0→1→0
+            const hw = (maxWidth / 2) * taper;
+
+            pos.push(Math.cos(angle) * (baseR - hw), Math.sin(angle) * (baseR - hw), 0);
+            pos.push(Math.cos(angle) * (baseR + hw), Math.sin(angle) * (baseR + hw), 0);
+
+            if (i < segs) {
+                const b = i * 2;
+                idx.push(b, b + 1, b + 2, b + 1, b + 3, b + 2);
+            }
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        geo.setIndex(idx);
+        geo.computeVertexNormals();
+        return geo;
+    }
+
+    const brushGeo = createBrushStrokeGeo(C.sections.outerR, startDeg, endDeg);
+    const brushMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.1,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+    });
+
     let currentTween: gsap.core.Tween | undefined;
 
     $effect(() => {
@@ -139,6 +189,16 @@
         reflectivity={0.8}
     />
 </T.Mesh>
+
+<!-- Curved specular brush-stroke on floor -->
+<T.Mesh
+    geometry={brushGeo}
+    material={brushMat}
+    rotation.x={-Math.PI / 2}
+    position.x={layout.offsetX}
+    position.y={C.sections.baseHeight + 0.002}
+    position.z={layout.offsetZ}
+/>
 
 <!-- Outer rim -->
 <T.Mesh
