@@ -14,7 +14,13 @@
     import gsap from 'gsap';
     import PlateBase from './PlateBase.svelte';
     import PieSection from './PieSection.svelte';
-    import { plateConfig as C, DEFAULT_SECTIONS, computeSectionTargetRotation, getPlateBaseRotation, type SectionDef } from '../utils/plate-config';
+    import {
+        plateConfig as C,
+        DEFAULT_SECTIONS,
+        computeSectionTargetRotation,
+        getPlateBaseRotation,
+        type SectionDef
+    } from '../utils/plate-config';
     import {
         computeSectionLayout,
         createSectionClipPlanes,
@@ -128,7 +134,7 @@
         gsap.to(rotationState, {
             rotation: target,
             duration: 0.6,
-            ease: 'power2.out',
+            ease: 'power2.out'
         });
     });
 
@@ -183,14 +189,24 @@
 <T.PointLight color="#fa71cd" intensity={0.12} distance={8} position={[0, -1.5, 0]} />
 
 <!-- Base plate — outer group = static tilt, inner group = animated spin -->
-<T.Group position.y={0} rotation.x={C.plateRotation.x} rotation.y={C.plateRotation.y} rotation.z={C.plateRotation.z}>
+<T.Group
+    position.y={0}
+    rotation.x={C.plateRotation.x}
+    rotation.y={C.plateRotation.y}
+    rotation.z={C.plateRotation.z}
+>
     <T.Group bind:ref={plateGroup}>
         <PlateBase floatY={plateFloatY} />
     </T.Group>
 </T.Group>
 
 <!-- Floating sections — same nesting: outer tilt, inner animated spin + float -->
-<T.Group position.y={0} rotation.x={C.plateRotation.x} rotation.y={C.plateRotation.y} rotation.z={C.plateRotation.z}>
+<T.Group
+    position.y={0}
+    rotation.x={C.plateRotation.x}
+    rotation.y={C.plateRotation.y}
+    rotation.z={C.plateRotation.z}
+>
     <T.Group bind:ref={sectionsGroup} position.y={secFloatY}>
         {#each sectionData as sec, i (i)}
             <!-- Per-section group for lift animation -->

@@ -95,9 +95,9 @@
     // Arc-shaped highlight following the section's curvature,
     // inset from the outer rim, tapering at both ends.
     function createBrushStrokeGeo(oR: number, sDeg: number, eDeg: number): THREE.BufferGeometry {
-        const inset = 0.12;       // fraction inset from outer edge
-        const coverage = 0.45;    // fraction of arc to cover (~15% shorter)
-        const maxWidth = 0.08;    // radial width at thickest point
+        const inset = 0.12; // fraction inset from outer edge
+        const coverage = 0.45; // fraction of arc to cover (~15% shorter)
+        const maxWidth = 0.08; // radial width at thickest point
         const segs = 32;
 
         const midDeg = (sDeg + eDeg) / 2;
@@ -138,7 +138,7 @@
         transparent: true,
         opacity: 0.1,
         blending: THREE.AdditiveBlending,
-        depthWrite: false,
+        depthWrite: false
     });
 
     let currentTween: gsap.core.Tween | undefined;

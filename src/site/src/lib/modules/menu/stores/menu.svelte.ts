@@ -13,19 +13,25 @@ let _selectedSection = $state<SectionId>('main');
 let _selection = $state<PlateSelection>({ main: null, side: null });
 
 export const menuState = {
-  get selectedSection() { return _selectedSection; },
-  set selectedSection(v: SectionId) { _selectedSection = v; },
+    get selectedSection() {
+        return _selectedSection;
+    },
+    set selectedSection(v: SectionId) {
+        _selectedSection = v;
+    },
 
-  get selection() { return _selection; },
+    get selection() {
+        return _selection;
+    },
 
-  selectFood(section: 'main' | 'side', item: MenuItem | null) {
-    _selection = { ..._selection, [section]: item };
-  },
+    selectFood(section: 'main' | 'side', item: MenuItem | null) {
+        _selection = { ..._selection, [section]: item };
+    },
 
-  reset() {
-    _selection = { main: null, side: null };
-    _selectedSection = 'none';
-  },
+    reset() {
+        _selection = { main: null, side: null };
+        _selectedSection = 'none';
+    }
 };
 
 // ─── Rotation state ────────────────────────────────────────────────
@@ -34,14 +40,23 @@ let _rotation = $state(Math.PI / 2);
 let _autoRotate = $state(true);
 
 export const rotationState = {
-  get rotation() { return _rotation; },
-  set rotation(v: number) { _rotation = v; _autoRotate = false; },
+    get rotation() {
+        return _rotation;
+    },
+    set rotation(v: number) {
+        _rotation = v;
+        _autoRotate = false;
+    },
 
-  get autoRotate() { return _autoRotate; },
-  set autoRotate(v: boolean) { _autoRotate = v; },
+    get autoRotate() {
+        return _autoRotate;
+    },
+    set autoRotate(v: boolean) {
+        _autoRotate = v;
+    },
 
-  nudge(delta: number) {
-    _rotation += delta;
-    _autoRotate = false;
-  },
+    nudge(delta: number) {
+        _rotation += delta;
+        _autoRotate = false;
+    }
 };

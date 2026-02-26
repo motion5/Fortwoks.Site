@@ -8,7 +8,7 @@ export const plateConfig = {
     plate: {
         radius: 2.0,
         thickness: 0.08,
-        floatHeight: 0.2,
+        floatHeight: 0.2
     },
 
     sections: {
@@ -17,42 +17,42 @@ export const plateConfig = {
         rimHeight: 0.26,
         rimThick: 0.065,
         outerR: 1.85,
-        innerR: 0.0,
+        innerR: 0.0
     },
 
     colors: {
         plateBase: '#e8e0f0',
         plateGold: '#c4a44a',
-        plateBlue: '#4a6fa5',
+        plateBlue: '#4a6fa5'
     },
 
     camera: {
         fov: 40,
         position: [3.0, 1.2, 5] as [number, number, number],
-        lookAt: [0, 0.05, 0] as [number, number, number],
+        lookAt: [0, 0.05, 0] as [number, number, number]
     },
 
     // Plate rotation (in radians) — static tilt applied to outer wrapper group.
     // The animated carousel spin is on a separate inner group so it doesn't
     // clobber these values.
     plateRotation: {
-        x: Math.PI * 60 / 180,      // +60 deg — tilt top face toward camera
-        y: -Math.PI * 80 / 180,     // -80 deg — anticlockwise turn
-        z: Math.PI * 10 / 180,      // +10 deg — slight clockwise roll
+        x: (Math.PI * 60) / 180, // +60 deg — tilt top face toward camera
+        y: (-Math.PI * 80) / 180, // -80 deg — anticlockwise turn
+        z: (Math.PI * 10) / 180 // +10 deg — slight clockwise roll
     },
 
     /** Section rotation — auto-rotate plate to center the active section */
     sectionRotation: {
-        enabled: true,
+        enabled: true
     },
 
     /** Per-plate-type rotation offsets (radians) indexed by section count.
      *  Applied to the base π/2 rotation so each plate type starts
      *  with its most important section facing the camera. */
     rotationOffsets: {
-        2: Math.PI,               // +180° — show the big section first
-        5: (50 * Math.PI) / 180,  // +50°  — slight offset for premium
-    } as Record<number, number>,
+        2: Math.PI, // +180° — show the big section first
+        5: (50 * Math.PI) / 180 // +50°  — slight offset for premium
+    } as Record<number, number>
 } as const;
 
 export type PlateConfig = typeof plateConfig;
@@ -73,10 +73,7 @@ export function getPlateBaseRotation(sectionCount: number): number {
  * - For N-section plates: centres the section's midpoint in front of
  *   the camera using the classic midpoint approach.
  */
-export function computeSectionTargetRotation(
-    sectionIndex: number,
-    sections: SectionDef[],
-): number {
+export function computeSectionTargetRotation(sectionIndex: number, sections: SectionDef[]): number {
     if (sectionIndex < 0 || sectionIndex >= sections.length) return 0;
 
     const base = getPlateBaseRotation(sections.length);
@@ -114,11 +111,11 @@ export interface SectionDef {
  *  [floorColor, rimColor] — mid-tone base colours.
  *  Active glow uses the emissive multiplier in PieSection to punch up to full vibrancy. */
 const SECTION_PALETTE: [string, string][] = [
-    ['#b8365e', '#b8365e'],   // deep rose
-    ['#1a9e50', '#1a9e50'],   // forest green
-    ['#b8860b', '#b8860b'],   // dark goldenrod
-    ['#1e5fa8', '#1e5fa8'],   // deep blue
-    ['#8b2fc9', '#8b2fc9'],   // rich purple
+    ['#b8365e', '#b8365e'], // deep rose
+    ['#1a9e50', '#1a9e50'], // forest green
+    ['#b8860b', '#b8860b'], // dark goldenrod
+    ['#1e5fa8', '#1e5fa8'], // deep blue
+    ['#8b2fc9', '#8b2fc9'] // rich purple
 ];
 
 /** Premium plate angular distribution:
@@ -133,7 +130,7 @@ export function createSectionDefs(count: number, color?: string): SectionDef[] {
         const c1 = color ?? SECTION_PALETTE[1][0];
         return [
             { startDeg: 0, endDeg: 216, floorColor: c0, rimColor: c0 },
-            { startDeg: 216, endDeg: 360, floorColor: c1, rimColor: c1 },
+            { startDeg: 216, endDeg: 360, floorColor: c1, rimColor: c1 }
         ];
     }
 
@@ -156,7 +153,7 @@ export function createSectionDefs(count: number, color?: string): SectionDef[] {
             startDeg: i * slice,
             endDeg: (i + 1) * slice,
             floorColor: c,
-            rimColor: c,
+            rimColor: c
         };
     });
 }
