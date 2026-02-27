@@ -348,7 +348,7 @@
         .plate-hero {
             width: 170px;
             height: 160px;
-            bottom: calc(100% - 30px);
+            bottom: calc(100% - 70px);
         }
     }
 
@@ -620,11 +620,11 @@
         }
 
         .sheet {
-            height: 82vh;
+            height: 78vh;
         }
 
         .header {
-            padding-top: 28px;
+            padding-top: 80px;
         }
     }
 </style>
