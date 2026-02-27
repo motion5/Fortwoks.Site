@@ -1,103 +1,92 @@
 <script lang="ts">
-    import { page } from '$app/stores';
+    import { themeStore } from '$lib/modules/ordering';
+    import { base } from '$app/paths';
 
-    const paymentIntentId = $page.url.searchParams.get('payment_intent');
+    let t = $derived(themeStore.tokens);
 </script>
 
 <svelte:head>
-    <title>Payment Successful</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+        rel="stylesheet"
+    />
+    <title>Fort Woks — Order Confirmed</title>
 </svelte:head>
 
-<div class="success-page">
-    <div class="container">
-        <div class="success-icon">✓</div>
-        <h1>Payment Successful!</h1>
-        <p class="message">Your payment has been processed successfully.</p>
-
-        {#if paymentIntentId}
-            <p class="payment-id">
-                Payment ID: <code>{paymentIntentId}</code>
-            </p>
-        {/if}
-
-        <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-        <a href="/dashboard" class="button">Go to Dashboard</a>
+<div class="page" style:background={t.bg} style:color={t.text}>
+    <div class="card" style:background={t.surface} style:border-color={t.surfaceBorder}>
+        <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path
+                    d="M8 16l6 6L24 10"
+                    stroke="#fff"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+            </svg>
+        </div>
+        <h1>Order confirmed</h1>
+        <p style:color={t.textSecondary}>
+            Your food is being prepared. Demo only — no real order placed.
+        </p>
+        <a href="{base}/menus" class="btn">Back to menu</a>
     </div>
 </div>
 
 <style>
-    .success-page {
+    .page {
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
-        background: #f9fafb;
+        font-family:
+            'DM Sans',
+            -apple-system,
+            sans-serif;
+        padding: 20px;
     }
 
-    .container {
-        width: 100%;
-        max-width: 500px;
-        background: white;
-        border-radius: 12px;
-        padding: 3rem 2rem;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    .card {
         text-align: center;
+        border: 1px solid;
+        border-radius: 16px;
+        padding: 48px 32px;
+        max-width: 400px;
+        width: 100%;
     }
 
-    .success-icon {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 1.5rem;
+    .icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 32px;
+        background: #22c55e;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #10b981;
-        color: white;
-        font-size: 3rem;
-        font-weight: bold;
-        border-radius: 50%;
+        margin: 0 auto 20px;
     }
 
     h1 {
-        margin: 0 0 1rem;
-        font-size: 2rem;
+        font-size: 24px;
         font-weight: 700;
-        color: #111827;
+        margin: 0 0 8px;
     }
 
-    .message {
-        margin: 0 0 1.5rem;
-        color: #6b7280;
-        font-size: 1.125rem;
+    p {
+        font-size: 14px;
+        margin: 0 0 24px;
+        line-height: 1.5;
     }
 
-    .payment-id {
-        margin: 0 0 2rem;
-        color: #6b7280;
-        font-size: 0.875rem;
-    }
-
-    .payment-id code {
-        padding: 0.25rem 0.5rem;
-        background: #f3f4f6;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 0.8125rem;
-    }
-
-    .button {
+    .btn {
         display: inline-block;
-        padding: 0.75rem 1.5rem;
+        padding: 12px 24px;
         background: #635bff;
-        color: white;
+        color: #fff;
         text-decoration: none;
-        border-radius: 6px;
+        border-radius: 10px;
         font-weight: 600;
-        transition: background 0.2s;
-    }
-
-    .button:hover {
-        background: #5145e6;
+        font-size: 14px;
     }
 </style>

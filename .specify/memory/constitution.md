@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
 ==================
-Version change: N/A → 1.0.0 (initial ratification)
+Version change: 1.0.0 → 1.1.0 (added Principle VII: Analytics From Day One)
 
 Principles defined:
   I.   BFF Boundary
@@ -10,16 +10,17 @@ Principles defined:
   IV.  Cache-First Menu Strategy
   V.   Payment Before Submission
   VI.  Scale-Ready Single-Site
+  VII. Analytics From Day One
 
 Added sections:
-  - Core Principles (6 principles)
+  - Core Principles (7 principles)
   - Technology Stack & Scope
   - Open Questions & Decision Log
   - Governance
 
 Templates checked:
   ✅ plan-template.md — Constitution Check section compatible;
-     gates will validate against all 6 principles
+     gates will validate against all 7 principles
   ✅ spec-template.md — user story structure compatible;
      FR markers can reference principle IDs (P-I through P-VI)
   ✅ tasks-template.md — phase structure accommodates
@@ -165,6 +166,31 @@ Building site-awareness from day one avoids a painful
 migration when the client expands. The cost of parameterising
 by site ID is negligible compared to retrofitting it later.
 
+### VII. Analytics From Day One
+
+Every user-facing feature MUST emit analytics events from
+its first implementation. The system MUST:
+
+- Use PostHog (self-hosted) as the sole analytics platform
+- Instrument all meaningful user interactions (page views,
+  clicks, form submissions, cart actions, checkout steps,
+  payment outcomes, order completions)
+- Include contextual properties with every event (site ID,
+  session ID, device type, feature area)
+- Track the full conversion funnel: menu browse → cart →
+  checkout → payment → order confirmed
+- NEVER add a user-facing feature without corresponding
+  analytics instrumentation — treat missing events as a bug
+- Respect user privacy: MUST comply with cookie consent
+  requirements and MUST NOT track PII beyond what is
+  necessary for analytics
+
+**Rationale**: Retroactively adding analytics is expensive
+and results in gaps in historical data. A takeaway business
+needs data on conversion rates, popular items, drop-off
+points, and peak ordering times from launch. Self-hosted
+PostHog provides full data ownership with no vendor lock-in.
+
 ## Technology Stack & Scope
 
 ### Stack
@@ -176,6 +202,7 @@ by site ID is negligible compared to retrofitting it later.
 | Backend (BFF) | C# / .NET 8+, minimal API or controllers |
 | Andromeda integration | ACS Web Ordering API (signpost pattern) |
 | Payments (server) | Stripe PaymentIntents, webhook verification |
+| Analytics | PostHog (self-hosted) |
 | Infrastructure | TBD (see Open Questions) |
 
 ### In Scope (We Build)
@@ -247,10 +274,10 @@ specs, plans, and implementations MUST comply.
 ### Compliance Review
 
 - Every `/speckit-plan` run MUST include a Constitution Check
-  gate validating against all 6 principles
+  gate validating against all 7 principles
 - Every `/speckit-specify` output MUST reference applicable
   principles in functional requirements
 - Violations MUST be justified in the Complexity Tracking
   table or resolved before proceeding
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): Pending formal project kickoff | **Last Amended**: 2026-02-23
+**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE): Pending formal project kickoff | **Last Amended**: 2026-02-26

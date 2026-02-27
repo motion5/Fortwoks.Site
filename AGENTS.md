@@ -1,6 +1,13 @@
-#Agent Behaviour
+# Agent Behaviour
 
 This file defines core agent behaviour. Project-specific build/test commands belong in project-level AGENTS.md files.
+
+# General Rules
+- When reporting information to me, be extremely concise and sacrifice grammar for the sake of concision.
+
+## Package Managers
+- **JavaScript/TypeScript**: Use `bun` instead of `npm`/`yarn`/`pnpm` for install, run, add, remove
+- **Python**: Use `uv` instead of `pip`/`pip3` for install, run, sync
 
 ## Context7 - API / Library Documenation
 Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
