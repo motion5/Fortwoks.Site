@@ -17,6 +17,6 @@
         z-index: 0;
         background-repeat: repeat;
         background-size: 420px;
-        opacity: 0.04;
+        opacity: 0.15;
     }
 </style>
