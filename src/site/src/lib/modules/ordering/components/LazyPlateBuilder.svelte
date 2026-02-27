@@ -616,11 +616,11 @@
 
     @media (max-width: 640px) {
         .sheet-wrapper {
-            margin-top: 20px;
+            margin-top: 60px;
         }
 
         .sheet {
-            height: 85vh;
+            height: 82vh;
         }
 
         .header {
